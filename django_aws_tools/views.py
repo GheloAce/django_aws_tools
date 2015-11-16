@@ -8,6 +8,7 @@ from time import mktime
 try:
     from urlparse import urlparse
 except ImportError:
+    # noinspection PyUnresolvedReferences
     from urllib.parse import urlparse
 
 try:
@@ -31,10 +32,10 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.db.models.loading import get_model
-from django.http import (HttpResponseBadRequest , HttpResponseRedirect, 
-                            QueryDict, HttpResponseForbidden, Http404)
-from django.shortcuts import (HttpResponse, redirect, render_to_response, 
-                                get_object_or_404, render)
+from django.http import (
+    HttpResponseBadRequest, HttpResponseRedirect, QueryDict, HttpResponseForbidden, Http404)
+from django.shortcuts import (
+    HttpResponse, redirect, render_to_response, get_object_or_404, render)
 from django.template import RequestContext, Context, Template
 from django.template.defaultfilters import floatformat
 from django.template.loader import render_to_string
@@ -46,8 +47,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import utc
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
-from django.views.generic import (FormView, TemplateView, DetailView, 
-                                    ListView, UpdateView)
+from django.views.generic import (
+    FormView, TemplateView, DetailView, ListView, UpdateView)
 
 # django_aws_tools
 from .models import Bounce, Complaint, Delivery
@@ -74,11 +75,10 @@ ALLOWED_TYPES = [
 
 
 class SNSView(object):
-
     @staticmethod
     def process_message(message, data):
-        """Function to process a JSON message delivered from Amazon"""  
-        #if not set(VITAL_MESSAGE_FIELDS) <= set(message):
+        """Function to process a JSON message delivered from Amazon"""
+        # if not set(VITAL_MESSAGE_FIELDS) <= set(message):
         #    return HttpResponse('Missing Vital Fields')
 
         if message.get('notificationType') == 'Complaint':
@@ -155,11 +155,11 @@ class SNSView(object):
 
         for c in complaints:
             sns_feedback.send(
-                    sender=Complaint,
-                    instance=c,
-                    message=message,
-                    notification=notification
-                )
+                sender=Complaint,
+                instance=c,
+                message=message,
+                notification=notification
+            )
 
         return HttpResponse('Complaint Processed')
 
@@ -217,16 +217,16 @@ class SNSView(object):
             r"sns.[a-z0-9\-]+.amazonaws.com$"
         )
         if not re.search(pattern, domain):
-            #logger.error('Invalid Subscription Domain %s', url)
+            # logger.error('Invalid Subscription Domain %s', url)
             return HttpResponseBadRequest('Improper Subscription Domain')
 
         try:
             result = urlopen(url).read()
             print result
-            #logger.info('Subscription Request Sent %s', url)
+            # logger.info('Subscription Request Sent %s', url)
         except urllib.HTTPError as error:
             result = error.read()
-            #logger.warning('HTTP Error Creating Subscription %s', str(result))
+            # logger.warning('HTTP Error Creating Subscription %s', str(result))
 
         sns_subscription.send(
             sender='SNS Approve',
@@ -249,7 +249,7 @@ class SNSView(object):
                     return HttpResponseBadRequest('No TopicArn Header')
 
                 if (not request.META.get('HTTP_X_AMZ_SNS_TOPIC_ARN')
-                        in settings.SNS_TOPIC_ARNS):
+                in settings.SNS_TOPIC_ARNS):
                     return HttpResponseBadRequest('Topic not found')
 
                 # load JSON POST body
@@ -271,10 +271,10 @@ class SNSView(object):
 
                 # send signal to say verification has been received
                 sns_notification.send(
-                        sender='SNS EndPoint',
-                        notification=data,
-                        request=request,
-                    )
+                    sender='SNS EndPoint',
+                    notification=data,
+                    request=request,
+                )
 
                 # subscription based messages
                 if data.get('Type') == 'SubscriptionConfirmation':

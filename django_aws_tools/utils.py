@@ -14,6 +14,7 @@ except ImportError:
 try:
     from urlparse import urlparse
 except ImportError:
+    # noinspection PyUnresolvedReferences
     from urllib.parse import urlparse
 
 import base64

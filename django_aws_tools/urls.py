@@ -1,7 +1,8 @@
+# DJANGO
 from django.conf.urls import patterns, url
-
-# django_aws_tools
+# LOCAL
 from .views import SNSView
+
 
 urlpatterns = patterns(
         '',
