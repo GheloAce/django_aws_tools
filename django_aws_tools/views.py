@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, date
 from copy import deepcopy
 from decimal import Decimal
 from time import mktime
+from urllib2 import HTTPError
 
 try:
     from urlparse import urlparse
@@ -79,7 +80,7 @@ class SNSView(object):
     def process_message(message, data):
         """Function to process a JSON message delivered from Amazon"""
         # if not set(VITAL_MESSAGE_FIELDS) <= set(message):
-        #    return HttpResponse('Missing Vital Fields')
+        # return HttpResponse('Missing Vital Fields')
 
         if message.get('notificationType') == 'Complaint':
             return SNSView.process_complaint(message, data)
@@ -93,7 +94,6 @@ class SNSView(object):
         # handle notifications
         else:
             return HttpResponse('Unknown notification type')
-
 
     @staticmethod
     def process_delivery(message, notification):
@@ -224,7 +224,7 @@ class SNSView(object):
             result = urlopen(url).read()
             print result
             # logger.info('Subscription Request Sent %s', url)
-        except urllib.HTTPError as error:
+        except HTTPError as error:
             result = error.read()
             # logger.warning('HTTP Error Creating Subscription %s', str(result))
 
@@ -237,9 +237,9 @@ class SNSView(object):
         # Return a 200 Status Code
         return HttpResponse(six.u(result))
 
-
     class EndPoint(View):
 
+        # noinspection PyMethodMayBeStatic
         def post(self, request, *args, **kwargs):
             logger.info(request.body)
 
@@ -248,8 +248,9 @@ class SNSView(object):
                 if 'HTTP_X_AMZ_SNS_TOPIC_ARN' not in request.META:
                     return HttpResponseBadRequest('No TopicArn Header')
 
-                if (not request.META.get('HTTP_X_AMZ_SNS_TOPIC_ARN')
-                in settings.SNS_TOPIC_ARNS):
+                if (
+                        not request.META.get('HTTP_X_AMZ_SNS_TOPIC_ARN')
+                        in settings.SNS_TOPIC_ARNS):
                     return HttpResponseBadRequest('Topic not found')
 
                 # load JSON POST body
@@ -260,13 +261,13 @@ class SNSView(object):
                     return HttpResponseBadRequest('Not Valid JSON')
 
                 # check if all vital fields are available
-                if not set(VITAL_NOTIFICATION_FIELDS) <= set(data):
+                if not set(VITAL_NOTIFICiATION_FIELDS) <= set(data):
                     msg = 'Request Missing Necessary Keys'
                     return HttpResponseBadRequest(msg)
 
                 # ensure allowed notifications
                 if not data.get('Type') in ALLOWED_TYPES:
-                    msg = 'Unknown notification type'
+                    msg = 'Unknown notifiication type'
                     return HttpResponseBadRequest(msg)
 
                 # send signal to say verification has been received
